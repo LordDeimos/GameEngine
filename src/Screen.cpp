@@ -11,8 +11,8 @@ Screen::Screen() {
 	window = SDL_CreateWindow("OpenGL", 100, 100, 800, 800, SDL_WINDOW_OPENGL);
 	context = SDL_GL_CreateContext(window);
 	glbinding::Binding::initialize();
-	shape = new Sprite(-0.5f, 0.5f, 1.0f, 1.0f, "stim-it.tga", static_cast<gl::GLenum>(GL_TEXTURE0));
-	shape2 = new Sprite(0.5f, -0.5f, 0.2f, 0.2f, "stim-math.tga", static_cast<gl::GLenum>(GL_TEXTURE1));
+	shape = new Sprite(-0.5f, 0.5f, 1.0f, 1.0f, "stim-it.tga", this);
+	shape2 = new Sprite(0.5f, -0.5f, 0.2f, 0.2f, "stim-math.tga", this);
 
 }
 
@@ -24,7 +24,7 @@ Screen::Screen(const char* title, int x, int y, int width, int height) {
 	window = SDL_CreateWindow(title, x, y, width, height, SDL_WINDOW_OPENGL);
 	context = SDL_GL_CreateContext(window);
 	glbinding::Binding::initialize();
-	shape = new Sprite(0.0f,0.0f,0.5f,0.5f,"stim-it.bmp", static_cast<gl::GLenum>(GL_TEXTURE0));
+	shape = new Sprite(0.0f,0.0f,0.5f,0.5f,"stim-it.bmp", this);
 }
 
 int Screen::draw() {
@@ -34,11 +34,9 @@ int Screen::draw() {
 		}
 		gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl::glClear(static_cast<gl::ClearBufferMask>(GL_COLOR_BUFFER_BIT));
-		//gl::glDrawElements(static_cast<gl::GLenum>(GL_TRIANGLES), 6, static_cast<gl::GLenum>(GL_UNSIGNED_INT), 0);
 		shape->draw();
 		shape2->draw();
-		//gl::glDrawArrays(ENUMCAST(GL_TRIANGLES), 0, 3);
-
+		clearCache();
 		SDL_GL_SwapWindow(this->window);
 	}
 
@@ -48,4 +46,14 @@ int Screen::draw() {
 	SDL_Quit();
 
 	return 0;
+}
+
+gl::GLenum Screen::getFreeTexture() {
+	gl::GLenum index = static_cast<gl::GLenum>(textureCache.size() + static_cast<int>(static_cast<gl::GLenum>(GL_TEXTURE0)));
+	textureCache.push_back(index);
+	return index;
+}
+
+void Screen::clearCache() {
+	textureCache.clear();
 }

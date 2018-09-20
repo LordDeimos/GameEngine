@@ -1,5 +1,4 @@
-#ifndef _IMAGE_H_
-#define _IMAGE_H_
+#pragma once
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -38,4 +37,3 @@ namespace GameEngine {
 	private:
 	};
 }
-#endif
