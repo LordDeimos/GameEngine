@@ -4,9 +4,9 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include "Image.h"
-#include "Shape.h"
 
 namespace GameEngine {
+	class Shape;
 	class Screen {
 	public:
 		Screen();
@@ -15,12 +15,12 @@ namespace GameEngine {
 		int draw();
 		gl::GLenum getFreeTexture();
 		void clearCache();
+		void addShape(Shape* shape);
 	private:
 		SDL_Window* window;
 		SDL_GLContext context;
 		SDL_Event windowEvent;
-		Shape* shape;
-		Shape* shape2;
+		std::vector<Shape*> shapes;
 		std::vector<gl::GLenum> textureCache;
 	};
 }

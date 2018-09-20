@@ -4,9 +4,9 @@
 #include <Windows.h>
 #endif
 #include "Image.h"
-#include "Screen.h"
 
 namespace GameEngine {
+	class Screen;
 	class Shape {
 	public:
 		Shape(Screen* screen);
@@ -14,7 +14,8 @@ namespace GameEngine {
 		virtual void draw();
 		gl::GLuint shaderProgram, vao, vbo, ebo, vertexShader, fragShader, tex;
 	protected:
-		const char* vertexSource, *fragSource;
+		const char* vertexSource;
+		const char* fragSource;
 		Screen* screen;
 	};
 	class Sprite : public Shape {
@@ -28,5 +29,6 @@ namespace GameEngine {
 		float x, y, width, height;
 		Image* texture;
 		gl::GLint posAttrib, texAttrib;
+		gl::GLenum index;
 	};
 }

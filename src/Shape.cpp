@@ -1,4 +1,25 @@
 #include "Shape.h"
+#include "Screen.h"
+
+#undef GL_ARRAY_BUFFER
+#undef GL_STATIC_DRAW
+#undef GL_ELEMENT_ARRAY_BUFFER
+#undef GL_VERTEX_SHADER
+#undef GL_FRAGMENT_SHADER
+#undef GL_COMPILE_STATUS
+#undef GL_FLOAT
+#undef GL_TEXTURE_2D
+#undef GL_TEXTURE_WRAP_S
+#undef GL_CLAMP_TO_EDGE
+#undef GL_TEXTURE_WRAP_T
+#undef GL_TEXTURE_MIN_FILTER
+#undef GL_TEXTURE_MAG_FILTER
+#undef GL_LINEAR
+#undef GL_RGBA
+#undef GL_UNSIGNED_BYTE
+#undef GL_UNSIGNED_INT
+#undef GL_TRIANGLES
+#undef GL_TEXTURE0
 
 using namespace GameEngine;
 using namespace gl;
@@ -34,7 +55,7 @@ Sprite::Sprite(float x, float y, float width, float height, std::string imgpath,
 		})glsl";
 
 	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	gl::glBindVertexArray(vao);
 
 	GLfloat vertices[] = {
 		//  Position      Texcoords
@@ -49,19 +70,19 @@ Sprite::Sprite(float x, float y, float width, float height, std::string imgpath,
 	};
 
 	glGenBuffers(1, &vbo);
-	glBindBuffer(static_cast<gl::GLenum>(GL_ARRAY_BUFFER), vbo);
-	glBufferData(static_cast<gl::GLenum>(GL_ARRAY_BUFFER), sizeof(vertices), vertices, static_cast<gl::GLenum>(GL_STATIC_DRAW));
+	gl::glBindBuffer(GLenum::GL_ARRAY_BUFFER, vbo);
+	gl::glBufferData(GLenum::GL_ARRAY_BUFFER, sizeof(vertices), vertices, GLenum::GL_STATIC_DRAW);
 
-	glGenBuffers(1, &ebo);
-	glBindBuffer(static_cast<gl::GLenum>(GL_ELEMENT_ARRAY_BUFFER), ebo);
-	glBufferData(static_cast<gl::GLenum>(GL_ELEMENT_ARRAY_BUFFER),
-		sizeof(elements), elements, static_cast<gl::GLenum>(GL_STATIC_DRAW));
+	gl::glGenBuffers(1, &ebo);
+	gl::glBindBuffer(GLenum::GL_ELEMENT_ARRAY_BUFFER, ebo);
+	gl::glBufferData(GLenum::GL_ELEMENT_ARRAY_BUFFER,
+		sizeof(elements), elements, GLenum::GL_STATIC_DRAW);
 
-	vertexShader = glCreateShader(static_cast<gl::GLenum>(GL_VERTEX_SHADER));
+	vertexShader = glCreateShader(GLenum::GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexSource, NULL);
 	glCompileShader(vertexShader);
 	GLint status;
-	glGetShaderiv(vertexShader, static_cast<gl::GLenum>(GL_VERTEX_SHADER), &status);
+	glGetShaderiv(vertexShader, GLenum::GL_VERTEX_SHADER, &status);
 	if (status != 1) {
 		char buffer[512];
 		glGetShaderInfoLog(vertexShader, 512, NULL, buffer);
@@ -69,10 +90,10 @@ Sprite::Sprite(float x, float y, float width, float height, std::string imgpath,
 		OutputDebugString("\n");
 	}
 
-	fragShader = glCreateShader(GLenum::GL_FRAGMENT_SHADER));
+	fragShader = glCreateShader(GLenum::GL_FRAGMENT_SHADER);
 	glShaderSource(fragShader, 1, &fragSource, NULL);
 	glCompileShader(fragShader);
-	glGetShaderiv(fragShader, GLenum::GL_COMPILE_STATUS), &status);
+	glGetShaderiv(fragShader, GLenum::GL_COMPILE_STATUS, &status);
 	if (status != 1) {
 		char buffer[512];
 		glGetShaderInfoLog(fragShader, 512, NULL, buffer);
@@ -89,19 +110,13 @@ Sprite::Sprite(float x, float y, float width, float height, std::string imgpath,
 
 	posAttrib = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, static_cast<gl::GLenum>(GL_FLOAT), GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(posAttrib, 2, GLenum::GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
 
 	texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
 	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, static_cast<gl::GLenum>(GL_FLOAT), GL_FALSE, 4 * sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
+	glVertexAttribPointer(texAttrib, 2, GLenum::GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
 
 	texture = new TgaImage(imgpath);
-	if (!texture->ok) return;
-
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_WRAP_S), static_cast<gl::GLenum>(GL_CLAMP_TO_EDGE));
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_WRAP_T), static_cast<gl::GLenum>(GL_CLAMP_TO_EDGE));
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_MIN_FILTER), static_cast<gl::GLenum>(GL_LINEAR));
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_MAG_FILTER), static_cast<gl::GLenum>(GL_LINEAR));
 }
 
 Sprite::~Sprite() {
@@ -119,18 +134,18 @@ Sprite::~Sprite() {
 
 void Sprite::draw() {
 	gl::GLenum index = screen->getFreeTexture();
-	int id = (int)index - (int)GL_TEXTURE0;
+	int id = (int)index - (int)GLenum::GL_TEXTURE0;
 	glBindVertexArray(vao);
 	glActiveTexture(index);
-	glBindTexture(static_cast<gl::GLenum>(GL_TEXTURE_2D), tex);
-	glTexImage2D(static_cast<gl::GLenum>(GL_TEXTURE_2D), 0, static_cast<gl::GLenum>(GL_RGBA), texture->width, texture->height, 0, static_cast<gl::GLenum>(GL_RGBA), static_cast<gl::GLenum>(GL_UNSIGNED_BYTE), texture->image);
+	glBindTexture(GLenum::GL_TEXTURE_2D, tex);
+	glTexImage2D(GLenum::GL_TEXTURE_2D, 0, GLenum::GL_RGBA, texture->width, texture->height, 0, GLenum::GL_RGBA, GLenum::GL_UNSIGNED_BYTE, texture->image);
 	glUniform1i(glGetUniformLocation(shaderProgram, "sprite"), id);
 
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_WRAP_S), static_cast<gl::GLenum>(GL_CLAMP_TO_EDGE));
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_WRAP_T), static_cast<gl::GLenum>(GL_CLAMP_TO_EDGE));
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_MIN_FILTER), static_cast<gl::GLenum>(GL_LINEAR));
-	glTexParameteri(static_cast<gl::GLenum>(GL_TEXTURE_2D), static_cast<gl::GLenum>(GL_TEXTURE_MAG_FILTER), static_cast<gl::GLenum>(GL_LINEAR));
-	gl::glDrawElements(static_cast<gl::GLenum>(GL_TRIANGLES), 6, static_cast<gl::GLenum>(GL_UNSIGNED_INT), 0);
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
+	gl::glDrawElements(GLenum::GL_TRIANGLES, 6, GLenum::GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 

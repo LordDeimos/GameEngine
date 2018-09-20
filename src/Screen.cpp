@@ -1,4 +1,8 @@
 #include "Screen.h"
+#include "Shape.h"
+
+#undef GL_COLOR_BUFFER_BIT
+#undef GL_TEXTURE0
 
 using namespace GameEngine;
 using namespace std;
@@ -11,8 +15,6 @@ Screen::Screen() {
 	window = SDL_CreateWindow("OpenGL", 100, 100, 800, 800, SDL_WINDOW_OPENGL);
 	context = SDL_GL_CreateContext(window);
 	glbinding::Binding::initialize();
-	shape = new Sprite(-0.5f, 0.5f, 1.0f, 1.0f, "stim-it.tga", this);
-	shape2 = new Sprite(0.5f, -0.5f, 0.2f, 0.2f, "stim-math.tga", this);
 
 }
 
@@ -24,7 +26,10 @@ Screen::Screen(const char* title, int x, int y, int width, int height) {
 	window = SDL_CreateWindow(title, x, y, width, height, SDL_WINDOW_OPENGL);
 	context = SDL_GL_CreateContext(window);
 	glbinding::Binding::initialize();
-	shape = new Sprite(0.0f,0.0f,0.5f,0.5f,"stim-it.bmp", this);
+}
+
+void Screen::addShape(Shape* shape) {
+	shapes.push_back(shape);
 }
 
 int Screen::draw() {
@@ -33,14 +38,15 @@ int Screen::draw() {
 			if (windowEvent.type == SDL_QUIT) break;
 		}
 		gl::glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		gl::glClear(static_cast<gl::ClearBufferMask>(GL_COLOR_BUFFER_BIT));
-		shape->draw();
-		shape2->draw();
+		gl::glClear(gl::ClearBufferMask::GL_COLOR_BUFFER_BIT);
+		for (void* shape : shapes) {
+			(static_cast<Shape*>(shape))->draw();
+		}
 		clearCache();
 		SDL_GL_SwapWindow(this->window);
 	}
 
-	delete[] shape; delete[] shape2;
+	shapes.clear();
 
 	SDL_GL_DeleteContext(context);
 	SDL_Quit();
@@ -49,7 +55,7 @@ int Screen::draw() {
 }
 
 gl::GLenum Screen::getFreeTexture() {
-	gl::GLenum index = static_cast<gl::GLenum>(textureCache.size() + static_cast<int>(static_cast<gl::GLenum>(GL_TEXTURE0)));
+	gl::GLenum index = static_cast<gl::GLenum>(textureCache.size() + static_cast<int>(gl::GLenum::GL_TEXTURE0));
 	textureCache.push_back(index);
 	return index;
 }
