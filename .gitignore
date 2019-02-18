@@ -12,4 +12,5 @@ CTestTestfile.cmake
 #Dirs
 build/
 .vs/
+lib/
 

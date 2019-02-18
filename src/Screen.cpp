@@ -7,17 +7,6 @@
 using namespace GameEngine;
 using namespace std;
 
-Screen::Screen() {
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	window = SDL_CreateWindow("OpenGL", 100, 100, 800, 800, SDL_WINDOW_OPENGL);
-	context = SDL_GL_CreateContext(window);
-	glbinding::Binding::initialize();
-
-}
-
 Screen::Screen(const char* title, int x, int y, int width, int height) {
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);

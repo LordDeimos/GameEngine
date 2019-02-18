@@ -1,6 +1,7 @@
 #include "Shape.h"
 #include "Screen.h"
 
+//Undefine all SDL defined OpenGL constants
 #undef GL_ARRAY_BUFFER
 #undef GL_STATIC_DRAW
 #undef GL_ELEMENT_ARRAY_BUFFER
@@ -16,6 +17,8 @@
 #undef GL_TEXTURE_MAG_FILTER
 #undef GL_LINEAR
 #undef GL_RGBA
+#undef GL_RGB
+#undef GL_BGRA
 #undef GL_UNSIGNED_BYTE
 #undef GL_UNSIGNED_INT
 #undef GL_TRIANGLES
@@ -40,10 +43,10 @@ Sprite::Sprite(float x, float y, float width, float height, std::string imgpath,
 		in vec2 texcoord;
 		in vec2 position;
 		out vec2 Texcoord;
-		//uniform mat4 transform;
+		uniform mat4 transform;
 		void main(){
 			Texcoord = texcoord;
-			gl_Position = vec4(position, 0.0, 1.0);
+			gl_Position = transform*vec4(position, 0.0, 1.0);
 		})glsl";
 	fragSource = R"glsl(
 		#version 150 core
@@ -54,16 +57,65 @@ Sprite::Sprite(float x, float y, float width, float height, std::string imgpath,
 			outColour = texture(sprite, Texcoord);
 		})glsl";
 
+	compileShaders();
+	std::string format = imgpath.substr(imgpath.find(".")+1, 3);
+	texture = new Image(imgpath);
+		OutputDebugString("File type not supported\n");
+
+	if (!texture) {
+		OutputDebugString("Texture Not Loaded\n");
+		return;
+	}
+}
+
+Sprite::~Sprite() {
+
+	gl::glDeleteTextures(1, &tex);
+
+	glDeleteProgram(shaderProgram);
+	glDeleteShader(fragShader);
+	glDeleteShader(vertexShader);
+
+	glDeleteBuffers(1, &vbo);
+
+	glDeleteVertexArrays(1, &vao);
+	delete texture;
+}
+
+void Sprite::draw() {
+
+	GLint transform = glGetUniformLocation(this->shaderProgram, "transform");
+	glUniformMatrix4fv(transform, 1, GL_FALSE, glm::value_ptr(trans));
+
+	gl::GLenum index = screen->getFreeTexture();
+	int id = (int)index - (int)GLenum::GL_TEXTURE0;
+	glBindVertexArray(vao);
+	glActiveTexture(index);
+	glBindTexture(GLenum::GL_TEXTURE_2D, tex);
+	glTexImage2D(GLenum::GL_TEXTURE_2D, 0, GLenum::GL_RGBA, texture->width, texture->height, 0, GLenum::GL_RGBA, GLenum::GL_UNSIGNED_BYTE, texture->image);
+	glUniform1i(glGetUniformLocation(shaderProgram, "sprite"), id);
+
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
+	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
+	gl::glDrawElements(GLenum::GL_TRIANGLES, 6, GLenum::GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+
+void Sprite::compileShaders() {
 	glGenVertexArrays(1, &vao);
 	gl::glBindVertexArray(vao);
 
 	GLfloat vertices[] = {
 		//  Position      Texcoords
 			x,y, 0.0f, 0.0f, // Top-left
-			x+width,y, 1.0f, 0.0f, // Top-right
-			x+width, y-height, 1.0f, 1.0f, // Bottom-right
-			x, y-height, 0.0f, 1.0f  // Bottom-left
+			x + width,y, 1.0f, 0.0f, // Top-right
+			x + width, y - height, 1.0f, 1.0f, // Bottom-right
+			x, y - height, 0.0f, 1.0f  // Bottom-left
 	};
+
 	GLuint elements[] = {
 		0, 1, 2,
 		2, 3, 0
@@ -114,45 +166,15 @@ Sprite::Sprite(float x, float y, float width, float height, std::string imgpath,
 
 	texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
 	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GLenum::GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
-
-	texture = new TgaImage(imgpath);
+	glVertexAttribPointer(texAttrib, 2, GLenum::GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 }
 
-Sprite::~Sprite() {
-
-	gl::glDeleteTextures(1, &tex);
-
-	glDeleteProgram(shaderProgram);
-	glDeleteShader(fragShader);
-	glDeleteShader(vertexShader);
-
-	glDeleteBuffers(1, &vbo);
-
-	glDeleteVertexArrays(1, &vao);
-}
-
-void Sprite::draw() {
-	gl::GLenum index = screen->getFreeTexture();
-	int id = (int)index - (int)GLenum::GL_TEXTURE0;
-	glBindVertexArray(vao);
-	glActiveTexture(index);
-	glBindTexture(GLenum::GL_TEXTURE_2D, tex);
-	glTexImage2D(GLenum::GL_TEXTURE_2D, 0, GLenum::GL_RGBA, texture->width, texture->height, 0, GLenum::GL_RGBA, GLenum::GL_UNSIGNED_BYTE, texture->image);
-	glUniform1i(glGetUniformLocation(shaderProgram, "sprite"), id);
-
-	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_S, GLenum::GL_CLAMP_TO_EDGE);
-	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_WRAP_T, GLenum::GL_CLAMP_TO_EDGE);
-	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MIN_FILTER, GLenum::GL_LINEAR);
-	glTexParameteri(GLenum::GL_TEXTURE_2D, GLenum::GL_TEXTURE_MAG_FILTER, GLenum::GL_LINEAR);
-	gl::glDrawElements(GLenum::GL_TRIANGLES, 6, GLenum::GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-}
 
 void Sprite::rotate(float degrees) {
-	GLint transform = glGetUniformLocation(shaderProgram, "transform");
+	trans = glm::rotate(trans, glm::radians(degrees), glm::vec3(0.0f, 0.0f, 1.0f));
+	//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 }
 
 void Sprite::translate(float dx, float dy) {
-	//Implemet Matrices
+	trans = glm::translate(trans, glm::vec3(dx, dy, 0.0f));
 }

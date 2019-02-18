@@ -9,9 +9,8 @@ namespace GameEngine {
 	class Shape;
 	class Screen {
 	public:
-		Screen();
-		Screen(const char* title, int x, int y, int width, int height);
-		~Screen();
+		Screen(const char* title = "OpenGL", int x = 100, int y = 100, int width = 800, int height = 600);
+		//~Screen();
 		int draw();
 		gl::GLenum getFreeTexture();
 		void clearCache();

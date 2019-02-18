@@ -1,8 +1,13 @@
 #pragma once
 #include <glbinding/gl/gl.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+
 #include "Image.h"
 
 namespace GameEngine {
@@ -17,6 +22,7 @@ namespace GameEngine {
 		const char* vertexSource;
 		const char* fragSource;
 		Screen* screen;
+		glm::mat4 trans = glm::mat4(1.0f);
 	};
 	class Sprite : public Shape {
 	public:
@@ -30,5 +36,6 @@ namespace GameEngine {
 		Image* texture;
 		gl::GLint posAttrib, texAttrib;
 		gl::GLenum index;
+		void compileShaders();
 	};
 }
