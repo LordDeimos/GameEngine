@@ -43,7 +43,7 @@ void TextureCube::generate(std::vector<std::unique_ptr<Image>>& faces) {
 	gl::glBindTexture(gl::GLenum::GL_TEXTURE_CUBE_MAP, ID);
 
 	for (unsigned int i = 0; i < faces.size(); i++){
-		glTexImage2D(gl::GLenum::GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl::GLenum::GL_RGB, faces[i]->width, faces[i]->height, 0, gl::GLenum::GL_RGB, gl::GLenum::GL_UNSIGNED_BYTE, faces[i]->image);
+		glTexImage2D(gl::GLenum::GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl::GLenum::GL_RGBA, faces[i]->width, faces[i]->height, 0, gl::GLenum::GL_RGBA, gl::GLenum::GL_UNSIGNED_BYTE, faces[i]->image);
 	}
 	glTexParameteri(gl::GLenum::GL_TEXTURE_CUBE_MAP, gl::GLenum::GL_TEXTURE_MIN_FILTER, gl::GLenum::GL_LINEAR);
 	glTexParameteri(gl::GLenum::GL_TEXTURE_CUBE_MAP, gl::GLenum::GL_TEXTURE_MAG_FILTER, gl::GLenum::GL_LINEAR);

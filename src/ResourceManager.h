@@ -18,7 +18,7 @@ namespace GameEngine {
 		static Texture2D* getTexture(const std::string& name);
 		static Shader* loadShader(const std::string& vShaderFile, const std::string& fShaderFile, const std::string& gShaderFile, const std::string& name);
 		static Texture2D* loadTexture(const std::string& imageFile, const std::string& name);
-		static TextureCube* loadCube(std::vector<std::string>& imageFiles, const std::string& name);
+		static TextureCube* loadCube(std::vector<std::string> imageFiles, const std::string& name);
 		static void clear();
 	private:
 		ResourceManager();

@@ -50,7 +50,7 @@ Texture2D* ResourceManager::loadTexture(const std::string& imageFile, const std:
 	return &Textures[name];
 }
 
-TextureCube* ResourceManager::loadCube(std::vector<std::string>& imageFiles, const std::string& name) {
+TextureCube* ResourceManager::loadCube(std::vector<std::string> imageFiles, const std::string& name) {
 	TextureCube texture;
 	std::vector<std::unique_ptr<Image>> images;
 	for (auto face : imageFiles) {

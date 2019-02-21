@@ -68,3 +68,10 @@
 #undef GL_LEQUAL
 #undef GL_TEXTURE5
 #undef GL_GEOMETRY_SHADER
+#undef GL_POINTS
+#undef GL_PROGRAM_POINT_SIZE
+#undef GL_INT
+#undef GL_FRONT_AND_BACK
+#undef GL_LINE
+#undef GL_CW
+#undef GL_CCW
